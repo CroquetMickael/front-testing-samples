@@ -1,0 +1,71 @@
+# testing-sample
+
+Cinq setups de test prêts à l'emploi qui ciblent l'app de `src/`. Aucun test n'est écrit : chaque dossier contient la configuration, le setup et des dossiers vides à remplir.
+
+| Dossier                    | Outil                                             | Environnement            | Script npm                          |
+| -------------------------- | ------------------------------------------------- | ------------------------ | ----------------------------------- |
+| `vitest-browser/`          | Vitest Browser Mode + `vitest-browser-react`      | Chromium (Playwright)    | `npm run test:vitest-browser`       |
+| `playwright-ct/`           | Playwright Component Testing (`experimental-ct-react`) | Chromium            | `npm run test:playwright-ct`        |
+| `vitest-cucumber/`         | `@amiceli/vitest-cucumber` + Testing Library      | jsdom                    | `npm run test:vitest-cucumber`      |
+| `vitest-cucumber-browser/` | `@amiceli/vitest-cucumber/browser` + `vitest-browser-react` | Chromium (Playwright) | `npm run test:vitest-cucumber-browser` |
+| `playwright-e2e/`          | Playwright E2E (`@playwright/test`) sur l'app réelle | Chromium + serveur Vite | `npm run test:playwright-e2e`       |
+
+`npm run test:all` lance les cinq en mode `run`. Les scripts Vitest sont en mode watch par défaut (`-- --run` pour un seul passage).
+
+Prérequis (une fois) : `npx playwright install chromium`.
+
+## Monter l'app dans un test — `shared/TestApp.tsx`
+
+Commun aux quatre setups de composants (pas utilisé en E2E, qui pilote la vraie app) :
+
+- `<TestApp initialPath="/souscription" />` : l'app complète (layout + toutes les routes) sur un routeur en mémoire, avec un store neuf à chaque montage.
+- `<TestProviders initialPath="/contrats/CTR-0001" routePath="/contrats/:contractId">…</TestProviders>` : une page ou un composant seul, avec le routeur et le store.
+
+Les routes de l'app sont exportées par `src/routes.tsx`.
+
+## Où mettre les fichiers / conventions
+
+### vitest-browser
+- Tests : `tests/**/*.test.tsx`
+- `render` vient de `vitest-browser-react` (nettoyage automatique avant chaque test) ; assertions avec `expect.element(...)`.
+
+### playwright-ct
+- Tests : `tests/**/*.spec.tsx`, `test`/`expect` importés depuis `@playwright/experimental-ct-react`.
+- `mount(<TestApp initialPath="/contrats" />)` pour l'app complète.
+- Pour un composant seul, utiliser le `hooksConfig` défini dans `playwright/index.tsx` :
+  `mount<HooksConfig>(<ClaimDetailPage />, { hooksConfig: { withProviders: true, initialPath: "/sinistres/SIN-0001", routePath: "/sinistres/:claimId" } })`.
+- Rapports et artefacts dans `playwright-report/` et `test-results/` (ignorés par git).
+
+### playwright-e2e
+- Tests : `tests/**/*.spec.ts`, `test`/`expect` importés depuis `@playwright/test`.
+- Playwright démarre lui-même l'app (`npm run dev` sur le port 5173) via `webServer`, puis navigue avec des URL relatives : `page.goto("/souscription")`.
+- En local, un `npm run dev` déjà lancé sur 5173 est réutilisé (`reuseExistingServer`) ; en CI, un serveur neuf est toujours démarré.
+- Les données de l'app sont en mémoire : chaque test (nouvel onglet) repart du jeu de données initial.
+- `locale` `fr-FR` et fuseau `Europe/Paris` sont fixés, pour que dates et montants s'affichent comme dans l'app.
+- Rapports et artefacts dans `playwright-report/` et `test-results/` (ignorés par git).
+
+### vitest-cucumber (jsdom)
+- Features : `features/*.feature`, en **français** (langue `fr` configurée dans `setup.ts` : `Fonctionnalité`, `Scénario`, `Étant donné que`, `Quand`, `Alors`).
+- Specs : `specs/**/*.spec.tsx`.
+- **Chemin du `.feature`** : relatif à la racine du repo, ex. `loadFeature("testing-sample/vitest-cucumber/features/souscription.feature")`. La lib ne résout un chemin relatif par rapport au spec que sous la forme `./fichier.feature` (même dossier).
+
+### vitest-cucumber-browser
+- Importer depuis `@amiceli/vitest-cucumber/browser` (lit le `.feature` via le serveur Vite et non via `fs`).
+- **Chemin du `.feature`** : absolu depuis la racine du repo, avec un `/` au début, ex. `loadFeature("/testing-sample/vitest-cucumber-browser/features/souscription.feature")`. La résolution relative de la lib casse dès que le chemin contient `/src/` ou `/tests/` (d'où les dossiers `specs/`).
+- `render` / `cleanup` viennent de `vitest-browser-react/pure`.
+
+### Point commun aux deux variantes Cucumber : nettoyer par scénario
+vitest-cucumber exécute **chaque étape comme un test Vitest distinct**. Un nettoyage « après chaque test » démonterait l'UI entre `Étant donné` et `Alors`. Les setups n'en déclarent donc pas ; on nettoie dans la feature :
+
+```tsx
+describeFeature(feature, ({ Scenario, AfterEachScenario }) => {
+  AfterEachScenario(() => cleanup());
+  // ...
+});
+```
+
+## Choix de config à connaître
+- Les configs Vitest fixent `root` à la racine du repo, d'où des chemins `include` / `setupFiles` préfixés par `testing-sample/...`.
+- Les configs Vitest Browser listent les dépendances dans `optimizeDeps.include` : sans ça, Vite ré-optimise au milieu du run et charge React deux fois (`Cannot read properties of null (reading 'useState')`).
+- `playwright`, `@playwright/test` et `@playwright/experimental-ct-react` sont figés sur la même version (1.62.1) pour partager un seul binaire Chromium avec Vitest.
+- `testing-sample/tsconfig.json` est référencé par le `tsconfig.json` racine : `npm run build` vérifie aussi les types des tests.

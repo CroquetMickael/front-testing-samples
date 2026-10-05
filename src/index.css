@@ -1,0 +1,79 @@
+.app-main {
+  padding-block: 1.5rem 3rem;
+}
+
+.app-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.app-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 2rem;
+}
+
+.app-fieldset > legend,
+.app-step-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.5rem 0 1rem;
+}
+
+.app-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.app-premium {
+  margin-top: 1rem;
+  font-size: 1.125rem;
+}
+
+.app-summary {
+  margin-bottom: 1.5rem;
+}
+
+.app-summary__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 0.5rem;
+}
+
+.app-summary__header h3 {
+  margin: 0.5rem 0;
+}
+
+.app-summary__row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  padding: 0.25rem 0;
+}
+
+.app-summary__row dt {
+  font-weight: 600;
+}
+
+.app-summary__row dd {
+  margin: 0;
+}
+
+.app-claim-description {
+  white-space: pre-line;
+  margin: 0;
+}
+
+/* Stack restitution rows (Assuré / Contrat…) instead of squeezing them side by side. */
+.af-restitution__content-row {
+  flex-basis: 100%;
+}
+
+.af-restitution__content-row + .af-restitution__content-row {
+  margin-top: 1.5rem;
+}
