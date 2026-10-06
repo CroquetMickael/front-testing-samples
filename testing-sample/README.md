@@ -1,6 +1,6 @@
 # testing-sample
 
-Cinq setups de test prêts à l'emploi qui ciblent l'app de `src/`. Aucun test n'est écrit : chaque dossier contient la configuration, le setup et des dossiers vides à remplir.
+Six setups de test prêts à l'emploi qui ciblent l'app de `src/`. Aucun test n'est écrit : chaque dossier contient la configuration, le setup et des dossiers vides à remplir.
 
 | Dossier                    | Outil                                             | Environnement            | Script npm                          |
 | -------------------------- | ------------------------------------------------- | ------------------------ | ----------------------------------- |
@@ -9,8 +9,9 @@ Cinq setups de test prêts à l'emploi qui ciblent l'app de `src/`. Aucun test n
 | `vitest-cucumber/`         | `@amiceli/vitest-cucumber` + Testing Library      | jsdom                    | `npm run test:vitest-cucumber`      |
 | `vitest-cucumber-browser/` | `@amiceli/vitest-cucumber/browser` + `vitest-browser-react` | Chromium (Playwright) | `npm run test:vitest-cucumber-browser` |
 | `playwright-e2e/`          | Playwright E2E (`@playwright/test`) sur l'app réelle | Chromium + serveur Vite | `npm run test:playwright-e2e`       |
+| `playwright-bdd/`          | Playwright E2E en Gherkin via [`playwright-bdd`](https://vitalets.github.io/playwright-bdd/) | Chromium + serveur Vite | `npm run test:playwright-bdd`       |
 
-`npm run test:all` lance les cinq en mode `run`. Les scripts Vitest sont en mode watch par défaut (`-- --run` pour un seul passage).
+`npm run test:all` lance les six en mode `run`. Les scripts Vitest sont en mode watch par défaut (`-- --run` pour un seul passage).
 
 Prérequis (une fois) : `npx playwright install chromium`.
 
@@ -44,6 +45,22 @@ Les routes de l'app sont exportées par `src/routes.tsx`.
 - `locale` `fr-FR` et fuseau `Europe/Paris` sont fixés, pour que dates et montants s'affichent comme dans l'app.
 - Rapports et artefacts dans `playwright-report/` et `test-results/` (ignorés par git).
 
+### playwright-bdd
+- Features : `features/**/*.feature`, en **français** (`language: "fr"` dans `defineBddConfig` : `Fonctionnalité`, `Scénario`, `Étant donné que`, `Quand`, `Alors`).
+- Steps : `steps/**/*.ts`, avec `Given` / `When` / `Then` importés depuis `steps/fixtures.ts` (et non depuis `playwright-bdd`) :
+  ```ts
+  import { expect } from "@playwright/test";
+  import { Given, Then } from "./fixtures";
+
+  Given("je suis sur la page {string}", async ({ page }, path: string) => {
+    await page.goto(path);
+  });
+  ```
+- Les fixtures Playwright (`page`, `request`…) sont reçues en premier argument de chaque step ; ajouter ses propres fixtures (page objects, données) avec `base.extend(...)` dans `steps/fixtures.ts`.
+- `bddgen` génère les specs Playwright dans `.features-gen/` (ignoré par git) avant `playwright test` : le script npm enchaîne les deux. Une step manquante fait échouer `bddgen` avec le snippet à copier.
+- Même config que `playwright-e2e` pour le reste : `webServer` sur le port 5173, `baseURL`, `locale` `fr-FR`, fuseau `Europe/Paris`, données repartant de zéro à chaque scénario.
+- Rapports et artefacts dans `playwright-report/` et `test-results/` (ignorés par git).
+
 ### vitest-cucumber (jsdom)
 - Features : `features/*.feature`, en **français** (langue `fr` configurée dans `setup.ts` : `Fonctionnalité`, `Scénario`, `Étant donné que`, `Quand`, `Alors`).
 - Specs : `specs/**/*.spec.tsx`.
@@ -67,5 +84,5 @@ describeFeature(feature, ({ Scenario, AfterEachScenario }) => {
 ## Choix de config à connaître
 - Les configs Vitest fixent `root` à la racine du repo, d'où des chemins `include` / `setupFiles` préfixés par `testing-sample/...`.
 - Les configs Vitest Browser listent les dépendances dans `optimizeDeps.include` : sans ça, Vite ré-optimise au milieu du run et charge React deux fois (`Cannot read properties of null (reading 'useState')`).
-- `playwright`, `@playwright/test` et `@playwright/experimental-ct-react` sont figés sur la même version (1.62.1) pour partager un seul binaire Chromium avec Vitest.
+- `playwright`, `@playwright/test` et `@playwright/experimental-ct-react` (utilisés aussi par `playwright-bdd`) sont figés sur la même version (1.62.1) pour partager un seul binaire Chromium avec Vitest.
 - `testing-sample/tsconfig.json` est référencé par le `tsconfig.json` racine : `npm run build` vérifie aussi les types des tests.

@@ -11,9 +11,10 @@
     "test:vitest-browser": "vitest --config testing-sample/vitest-browser/vitest.config.ts",
     "test:playwright-ct": "playwright test -c testing-sample/playwright-ct/playwright-ct.config.ts --pass-with-no-tests",
     "test:playwright-e2e": "playwright test -c testing-sample/playwright-e2e/playwright.config.ts --pass-with-no-tests",
+    "test:playwright-bdd": "bddgen -c testing-sample/playwright-bdd/playwright.config.ts && playwright test -c testing-sample/playwright-bdd/playwright.config.ts --pass-with-no-tests",
     "test:vitest-cucumber": "vitest --config testing-sample/vitest-cucumber/vitest.config.ts",
     "test:vitest-cucumber-browser": "vitest --config testing-sample/vitest-cucumber-browser/vitest.config.ts",
-    "test:all": "npm run test:vitest-browser -- --run && npm run test:playwright-ct && npm run test:vitest-cucumber -- --run && npm run test:vitest-cucumber-browser -- --run && npm run test:playwright-e2e"
+    "test:all": "npm run test:vitest-browser -- --run && npm run test:playwright-ct && npm run test:vitest-cucumber -- --run && npm run test:vitest-cucumber-browser -- --run && npm run test:playwright-e2e && npm run test:playwright-bdd"
   },
   "dependencies": {
     "@axa-fr/canopee-css": "^1.8.0",
@@ -41,6 +42,7 @@
     "jsdom": "^29.1.1",
     "oxlint": "^1.81.0",
     "playwright": "1.62.1",
+    "playwright-bdd": "^9.2.1",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
     "vitest": "^5.0.3",
