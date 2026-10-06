@@ -13,7 +13,7 @@ Six setups de test prêts à l'emploi qui ciblent l'app de `src/`. Aucun test n'
 
 `npm run test:all` lance les six en mode `run`. Les scripts Vitest sont en mode watch par défaut (`-- --run` pour un seul passage).
 
-Prérequis (une fois) : `npx playwright install chromium`.
+Prérequis (une fois) : `npx playwright install chromium`, et **Docker** lancé (Microcks, voir plus bas).
 
 ## Monter l'app dans un test — `shared/TestApp.tsx`
 
@@ -23,6 +23,17 @@ Commun aux quatre setups de composants (pas utilisé en E2E, qui pilote la vraie
 - `<TestProviders initialPath="/contrats/CTR-0001" routePath="/contrats/:contractId">…</TestProviders>` : une page ou un composant seul, avec le routeur et le store.
 
 Les routes de l'app sont exportées par `src/routes.tsx`.
+
+## Microcks — `microcks/`
+
+Les six setups démarrent un [Microcks](https://microcks.io/) **vide** (aucun mock importé) via leur `globalSetup` commun, `microcks/global-setup.ts`, et l'arrêtent à la fin du run.
+
+- Conteneur `microcks/microcks-uber:1.14.0` lancé par [Testcontainers](https://github.com/microcks/microcks-testcontainers-node) sur un **port fixe**, `8585` : l'URL est connue d'avance, y compris dans le navigateur et dans l'app servie par Vite.
+- `microcks/endpoints.ts` (importable partout, Node comme navigateur) : `MICROCKS_URL` et `microcksRestUrl(service, version)` pour l'URL d'un mock REST (`/rest/{titre OpenAPI}/{version}`).
+- Instance déjà lancée sur 8585 (ex. `npm run microcks`) : réutilisée, pas de nouveau conteneur. `npm run microcks` garde un Microcks ouvert (UI sur http://localhost:8585, Ctrl+C pour l'arrêter) : pratique pour importer des API à la main et pour enchaîner les runs sans attendre le démarrage (~10 s).
+- `MICROCKS=off npm run test:…` : ne démarre pas Microcks (pas besoin de Docker).
+- Les mocks (OpenAPI, Postman…) ne sont pas importés automatiquement : depuis l'UI, ou dans un test avec l'API REST de Microcks (`POST ${MICROCKS_URL}/api/artifact/upload`).
+- Un seul Microcks à la fois sur 8585 : lancer les runners les uns après les autres (comme `test:all`) ou partager un `npm run microcks`.
 
 ## Où mettre les fichiers / conventions
 
@@ -85,4 +96,5 @@ describeFeature(feature, ({ Scenario, AfterEachScenario }) => {
 - Les configs Vitest fixent `root` à la racine du repo, d'où des chemins `include` / `setupFiles` préfixés par `testing-sample/...`.
 - Les configs Vitest Browser listent les dépendances dans `optimizeDeps.include` : sans ça, Vite ré-optimise au milieu du run et charge React deux fois (`Cannot read properties of null (reading 'useState')`).
 - `playwright`, `@playwright/test` et `@playwright/experimental-ct-react` (utilisés aussi par `playwright-bdd`) sont figés sur la même version (1.62.1) pour partager un seul binaire Chromium avec Vitest.
+- Le `globalSetup` Microcks est déclaré dans chaque config (`testing-sample/microcks/global-setup.ts` côté Vitest, relatif à la racine ; `../microcks/global-setup.ts` côté Playwright, relatif à la config).
 - `testing-sample/tsconfig.json` est référencé par le `tsconfig.json` racine : `npm run build` vérifie aussi les types des tests.
