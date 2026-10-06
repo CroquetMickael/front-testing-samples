@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "microcks": "node testing-sample/microcks/start.ts",
     "test:vitest-browser": "vitest --config testing-sample/vitest-browser/vitest.config.ts",
     "test:playwright-ct": "playwright test -c testing-sample/playwright-ct/playwright-ct.config.ts --pass-with-no-tests",
     "test:playwright-e2e": "playwright test -c testing-sample/playwright-e2e/playwright.config.ts --pass-with-no-tests",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@amiceli/vitest-cucumber": "^8.0.0",
+    "@microcks/microcks-testcontainers": "^0.3.5",
     "@playwright/experimental-ct-react": "1.62.1",
     "@playwright/test": "1.62.1",
     "@testing-library/dom": "^10.4.2",

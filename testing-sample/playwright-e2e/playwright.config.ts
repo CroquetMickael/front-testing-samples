@@ -7,6 +7,7 @@ const BASE_URL = `http://localhost:${PORT}`;
 export default defineConfig({
   testDir: "./tests",
   outputDir: "./test-results",
+  globalSetup: "../microcks/global-setup.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
