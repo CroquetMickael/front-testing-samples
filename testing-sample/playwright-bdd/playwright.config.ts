@@ -16,6 +16,7 @@ const testDir = defineBddConfig({
 export default defineConfig({
   testDir,
   outputDir: "./test-results",
+  globalSetup: "../microcks/global-setup.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
