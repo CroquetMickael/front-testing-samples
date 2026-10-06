@@ -1,0 +1,3 @@
+test-results/
+playwright-report/
+.features-gen/

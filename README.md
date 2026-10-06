@@ -20,7 +20,7 @@ npm run lint
 
 ## Tests
 
-Le dossier [`testing-sample/`](testing-sample/README.md) contient cinq setups prêts à remplir (Vitest Browser, Playwright Component, Vitest Cucumber, Vitest Cucumber + Browser Mode, Playwright E2E).
+Le dossier [`testing-sample/`](testing-sample/README.md) contient six setups prêts à remplir (Vitest Browser, Playwright Component, Vitest Cucumber, Vitest Cucumber + Browser Mode, Playwright E2E, Playwright BDD).
 
 ## Pages
 
