@@ -4,7 +4,6 @@ export default defineConfig({
   testDir: "./tests",
   snapshotDir: "./__snapshots__",
   outputDir: "./test-results",
-  globalSetup: "../microcks/global-setup.ts",
   timeout: 10_000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

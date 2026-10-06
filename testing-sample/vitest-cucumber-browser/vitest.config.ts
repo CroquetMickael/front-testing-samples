@@ -26,7 +26,6 @@ export default defineConfig({
     // Folder names matter: the browser `loadFeature` mis-resolves paths containing /src/ or /tests/.
     include: ["testing-sample/vitest-cucumber-browser/specs/**/*.spec.{ts,tsx}"],
     setupFiles: ["testing-sample/vitest-cucumber-browser/setup.ts"],
-    globalSetup: ["testing-sample/microcks/global-setup.ts"],
     passWithNoTests: true,
     browser: {
       enabled: true,

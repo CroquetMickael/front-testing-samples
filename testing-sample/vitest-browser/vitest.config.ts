@@ -24,7 +24,6 @@ export default defineConfig({
     name: "vitest-browser",
     include: ["testing-sample/vitest-browser/tests/**/*.test.{ts,tsx}"],
     setupFiles: ["testing-sample/vitest-browser/setup.ts"],
-    globalSetup: ["testing-sample/microcks/global-setup.ts"],
     passWithNoTests: true,
     browser: {
       enabled: true,

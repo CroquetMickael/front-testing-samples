@@ -10,7 +10,6 @@ export default defineConfig({
     environment: "jsdom",
     include: ["testing-sample/vitest-cucumber/specs/**/*.spec.{ts,tsx}"],
     setupFiles: ["testing-sample/vitest-cucumber/setup.ts"],
-    globalSetup: ["testing-sample/microcks/global-setup.ts"],
     passWithNoTests: true,
     // AXA components import their own CSS; jsdom does not need it.
     css: false,
